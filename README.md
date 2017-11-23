@@ -1,0 +1,2 @@
+# FEND_Feed_Reader_Testing
+使用javascript基于jasmine框架测试驱动模式编写的订阅阅读器测试项目
