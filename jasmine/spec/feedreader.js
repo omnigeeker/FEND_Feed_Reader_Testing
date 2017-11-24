@@ -16,6 +16,12 @@ $(function(){
          * 比如你把 app.js 里面的 allFeeds 变量变成一个空的数组然后刷新
          * 页面看看会发生什么。
         */
+        function ckeck_is_string_and_not_none(name) {
+            expect(name).toBeDefined();
+            expect(typeof name).toBe("string");
+            expect(name.length).toBeGreaterThan(0);
+        }
+
         it('RSS列表是否被定义 且 长度不为0', () => {
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toBe(0);
@@ -25,10 +31,11 @@ $(function(){
          * 编写一个测试遍历 allFeeds 对象里面的所有的源来保证有链接字段而且链接不是空的。
          */
         it('测试allFeeds,保证有链接', () => {
+            var regularExpressionUrl = /^((ht|f)tps?):\/\/([\w\-]+(\.[\w\-]+)*\/)*[\w\-]+(\.[\w\-]+)*\/?(\?([\w\-\.,@?^=%&:\/~\+#]*)+)?/; // 检查 URL 格式是否正确的正规表达式
+            
             for(let feed of allFeeds) {
-                expect(feed.url).toBeDefined();
-                expect(typeof feed.url).toBe("string");
-                expect(feed.url.startsWith("http://") || feed.url.startsWith("https://")).toBe(true);
+                ckeck_is_string_and_not_none(feed.url);
+                expect(feed.url).toMatch(regularExpressionUrl); // 检查格式是否符合正则表达式      
             }
         });
 
@@ -37,9 +44,7 @@ $(function(){
          */
         it('测试allFeeds,保证有名字', () => {
             for(let feed of allFeeds) {
-                expect(feed.name).toBeDefined();
-                expect(typeof feed.name).toBe("string");
-                expect(feed.name.length).toBeGreaterThan(0);
+                ckeck_is_string_and_not_none(feed.name);
             }
         });
     });
@@ -52,7 +57,7 @@ $(function(){
          */
         it ('测试菜单元素默认是隐藏的', () => {
             expect($('body').length).toBe(1);
-            expect($('body').attr("class")).toBe("menu-hidden");
+            expect($('body').hasClass('menu-hidden')).toBe(true);
         });
 
          /*
@@ -62,14 +67,14 @@ $(function(){
           */
         it ('测试菜单元素点击后可以隐藏或者显示', () => {
             $('.menu-icon-link').trigger('click');
-            expect($('body').attr("class")).toBe("");
+            expect($('body').hasClass('menu-hidden')).toBe(false);
             $('.menu-icon-link').trigger('click');
-            expect($('body').attr("class")).toBe("menu-hidden");
+            expect($('body').hasClass('menu-hidden')).toBe(true);
         });
     });
 
     /** 因为中众所周知的VPN的原因，用VPN访问国外服务的超时判断时间调长 */
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 20 * 1000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30 * 1000;
 
     /* 写一个叫做 "Initial Entries" 的测试用例 */
     describe('Initial Entries', () => {
@@ -83,9 +88,7 @@ $(function(){
         let index = 0;
 
         beforeEach((done) => {
-            loadFeed(index, () => {
-                done();
-            });
+            loadFeed(index, done);
             // console.log("beforeEach " + index);
             index ++;
         });
@@ -94,10 +97,9 @@ $(function(){
          * 循环检查所有的rss是否都正常
          */
         for (let i = 0; i < allFeeds.length; i ++) {
-            it(`loadFeed 调用 rss ${i} 正常, 至少1个 .entry 元素`, (done) => {
+            it(`loadFeed 调用 rss ${i} 正常, 至少1个 .entry 元素`, () => {
                 // console.log($('.feed').find('.entry').first().html());
                 expect($('.feed').find('.entry').length).toBeGreaterThan(0);
-                done();
             });
         }
     });
@@ -125,7 +127,7 @@ $(function(){
             });
         });
 
-        it("测试加载新源的时候内容会变", (done) => {
+        it("测试加载新源的时候内容会变", () => {
             expect(firstRssEntry0).toBeDefined();
             expect(typeof firstRssEntry0).toBe("string");
             expect(firstRssEntry0.length).toBeGreaterThan(0);
@@ -135,7 +137,6 @@ $(function(){
             expect(secondRssEntry0.length).toBeGreaterThan(0);
 
             expect(secondRssEntry0).not.toEqual(firstRssEntry0);
-            done();
         });
     });
 }());
